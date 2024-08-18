@@ -89,12 +89,22 @@
   "Syntax table in use in reason mode buffers.")
 
 ;; KEYWORDS AND LITERALS
+(defun reason-ts--check-builtin (node)
+  "Check if NODE is a builtin type."
+  (seq-contains-p '("unit" "int")
+                  (treesit-node-text node)))
 
 ;; FONT LOCK
 (defvar reason-ts-font-lock-rules
   `( :language reason
      :feature variable
      ((value_name) @font-lock-variable-name-face)
+
+     :language reason
+     :feature builtin
+     (((type_constructor) @font-lock-builtin-face
+       (:pred reason-ts--check-builtin
+              @font-lock-builtin-face)))
 
      :language reason
      :feature module
@@ -128,7 +138,7 @@ Return nil if there is no name or if NODE is not a defun node."
 
     (setq-local treesit-font-lock-settings (apply #'treesit-font-lock-rules reason-ts-font-lock-rules))
     (setq-local treesit-font-lock-feature-list '((comment keyword)
-                                                 (type constant module)
+                                                 (type constant module builtin)
                                                  (extra function variable)
                                                  (operator literal punctuation)))
 
